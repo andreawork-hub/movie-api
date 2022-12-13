@@ -1,17 +1,8 @@
-const express = require('express'),
-    morgan = require('morgan');
-// fs = require('fs'), //import built in node modules fs and path
-// path = require('path');
-const res = require("express/lib/response");
-
-const app = express();
+const express = require('express');
 const bodyParser = require('body-parser'),
     methodOverride = require('method-override');
-const res = require('express/lib/response');
-// create a write stream (in append mode)
-// a 'log.txt' file is created in root directory
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'log.txt'), { flags: 'a' })
-
+const morgan = require('morgan');
+const app = express();
 
 let topMovies = [
     {
@@ -65,46 +56,35 @@ let topMovies = [
         director: 'Nancy Meyers'
     },
 ];
+app.use(express.static('public'));
+app.use(morgan('common'));
 
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
 app.use(methodOverride());
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
-//setup the logger
-app.use(morgan('combined', { stream: accessLogStream }));
+
+
+
+
 
 app.get('/', (req, res) => {
     res.send('Welcome to myFlix!');
 });
 
-app.get('/secreturl', (req, res) => {
-    res.send('This is a secret url with super top-secret content.');
-});
-
-app.use('/movies', express.static('public'));
-
-// GET requests
-app.get('/movies ', (req, res) => {
+app.get('/movie', (req, res) => {
     res.json(topMovies);
-});
-
-app.get('/', (req, res) => {
-    res.send('Welcome to myFlix!');
 });
 
 app.get('/documentation', (req, res) => {
     res.sendFile('public/documentation.html', { root: __dirname });
 });
 
-app.get('/movies ', (req, res) => {
-    res.json(topMovies);
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
 });
-//
 
 // listen for requests 
 app.listen(8080, () => {
