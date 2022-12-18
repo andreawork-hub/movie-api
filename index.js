@@ -209,7 +209,7 @@ app.delete('/users/:id/:movieTitle', (req, res) => {
     }
 })
 
-// DELETE MOVIE TITLE 
+// DELETE USER
 app.delete('/users/:id', (req, res) => {
     const { id } = req.params;
 
@@ -269,7 +269,8 @@ app.get('/documentation', (req, res) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
-});
+})
+
 
 // listen for requests 
 app.listen(8080, () => {
