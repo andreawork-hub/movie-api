@@ -163,7 +163,7 @@ app.delete('/users/:UserName', (req, res) => {
         });
 });
 
-// Get all users
+// Get all movies 
 app.get('/movies', (req, res) => {
     Movies.find()
         .then((movies) => {

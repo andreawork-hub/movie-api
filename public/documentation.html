@@ -62,85 +62,127 @@
         </thead>
         <tbody class="table-group-divider">
           <tr>
-            <th scope="row">Create User</th>
+            <th scope="row">Allow new users to register</th>
             <td>/users</td>
             <td>POST</td>
             <td>none</td>
             <td>
               A JSON object holding data about the user to add, structured like:
-              <span> { Name: 'Anna', FavoriteMovies: ['The Holiday'] } </span>
+              <span>
+                { "UserName": "larissatest", "Password": "password1234",
+                "Email": "larissatest@yahoo.com", "Birth_Date": "1998-03-29" }
+              </span>
             </td>
             <td>
               A JSON object holding data about the user that was added,
               including an ID:
               <span>
-                { Id: 1, Name: 'Anna', FavoriteMovies: ['The Holiday'] }
+                { "_id": "63a8476aa4d41daa8979c308", "UserName": "larissatest",
+                "Password": "password1234", "Email": "larissatest@yahoo.com",
+                "Birth_Date": "1998-03-29", "FavoriteMovies": [] }
               </span>
             </td>
           </tr>
           <tr>
-            <th scope="row">Update User</th>
-            <td>/users/:id</td>
+            <th scope="row">Allow users to update their user info</th>
+            <td>/users/:UserName</td>
             <td>PUT</td>
-            <td>:id</td>
-            <td>none</td>
-            <td>none</td>
+            <td>:UserName</td>
+            <td>
+              A JSON object holding data about the user, structured like:
+              <span>
+                { "_id": "63a8476aa4d41daa8979c308", "UserName": "larissatest",
+                "Password": "password1234", "Email": "larissatest@yahoo.com",
+                "Birth_Date": "1998-03-29", "FavoriteMovies": [] }
+              </span>
+            </td>
+            <td>
+              A JSON object holding data about the user with the updated
+              information.
+              <span>
+                { "_id": "63a4a58e1964935afa9ba57b", "UserId": 1112, "UserName":
+                "alexkiry1212", "Password": "password1212", "Email": "
+                alexkiry@yahoo.com", "Birth_Date": "1992-12-12T00:00:00.000Z",
+                "FavoriteMovies": [] }
+              </span>
+            </td>
           </tr>
           <tr>
-            <th scope="row">User Add Favorite Movie</th>
-            <td>/users/:id/:movieTitle</td>
+            <th scope="row">
+              Allow users to add a movie to their list of favorites
+            </th>
+            <td>/users/:UserName/movies/:MovieID</td>
             <td>POST</td>
-            <td>:id, :movieTitle</td>
+            <td>:UserName, :MovieID</td>
             <td>none</td>
-            <td>none</td>
+            <td>
+              A JSON Object holding data about the User and the MovieID that was
+              added.
+            </td>
           </tr>
           <tr>
-            <th scope="row">User Delete Favorite Movie</th>
-            <td>/users/:id/:movieTitle</td>
+            <th scope="row">
+              Allow users to remove a movie from their list of favorites
+            </th>
+            <td>/users/:UserName/movies/:MovieID</td>
             <td>DELETE</td>
-            <td>:id, :movieTitle</td>
+            <td>:UserName, :MovieID</td>
             <td>none</td>
-            <td>none</td>
+            <td>
+              A JSON Object holding data about the User, without the MovieID
+              that was deleted.
+            </td>
           </tr>
           <tr>
-            <th scope="row">Delete User</th>
-            <td>/users/:id</td>
+            <th scope="row">Allow existing users to deregister</th>
+            <td>/users/:UserName</td>
             <td>DELETE</td>
-            <td>:id</td>
+            <td>:UserName</td>
             <td>none</td>
-            <td>none</td>
+            <td>A text message with information, that the user was deleted.</td>
           </tr>
           <tr>
-            <th scope="row">Return A List Of All Movies</th>
+            <th scope="row">Return a list of ALL movies to the user</th>
             <td>/movies</td>
             <td>GET</td>
             <td>none</td>
             <td>none</td>
-            <td>none</td>
+            <td>A JSON object holding data about all the movies.</td>
           </tr>
           <tr>
-            <th scope="row">Return A Movie by Title</th>
-            <td>/movies/:title</td>
+            <th scope="row">
+              Return data about a single movie by title to the user
+            </th>
+            <td>/movies/:Title</td>
             <td>GET</td>
-            <td>:title</td>
+            <td>:Title</td>
             <td>none</td>
-            <td>none</td>
+            <td>
+              A JSON object holding data about a single movie, (description,
+              genre, director, image URL, whether it’s featured or not).
+            </td>
           </tr>
           <tr>
-            <th scope="row">Return A Movie by Genre</th>
-            <td>/movies/genre/:genreName'</td>
+            <th scope="row">Return data about a genre by genre name.</th>
+            <td>/movies/genres/:Name</td>
             <td>GET</td>
-            <td>:genreName</td>
+            <td>:Name</td>
             <td>none</td>
-            <td>none</td>
+            <td>
+              A JSON object holding data about a selected genre (name and
+              description).
+            </td>
           </tr>
           <tr>
-            <th scope="row">Return A Movie by Director</th>
-            <td>/movies/directors/:directorName</td>
+            <th scope="row">Return data about a director by director name.</th>
+            <td>/movies/directors/:Name</td>
             <td>GET</td>
-            <td>:directorName</td>
+            <td>:Name</td>
             <td>none</td>
-            <td>none</td>
+            <td>
+              A JSON object holding data about a selected director (bio, birth
+              year, death year).
+            </td>
           </tr>
         </tbody>
       </table>
