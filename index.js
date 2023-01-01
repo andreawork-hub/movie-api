@@ -5,6 +5,8 @@ const uuid = require('uuid');
 const morgan = require('morgan');
 const app = express();
 
+const { check, validationResult } = require('express-validator');
+
 const mongoose = require('mongoose');
 const Models = require('./models.js');
 
@@ -24,6 +26,21 @@ app.use(morgan('common'));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+const cors = require('cors');
+// app.use(cors());
+
+let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) { // If a specific origin isn’t found on the list of allowed origins
+            let message = 'The CORS policy for this application doesn\'t allow access from origin ' + origin;
+            return callback(new Error(message), false);
+        }
+        return callback(null, true);
+    }
+}));
 
 let auth = require('./auth')(app);
 //ensures that Express is available in “auth.js” file as well
@@ -37,31 +54,47 @@ app.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
 });
 
 //Add a user
-app.post('/users', passport.authenticate('jwt', { session: false }), (req, res) => {
-    Users.findOne({ UserName: req.body.UserName })
-        .then((user) => {
-            if (user) {
-                return res.status(400).send(req.body.UserName + 'already exists');
-            } else {
-                Users
-                    .create({
-                        UserName: req.body.UserName,
-                        Password: req.body.Password,
-                        Email: req.body.Email,
-                        Birth_Date: req.body.Birth_Date
-                    })
-                    .then((user) => { res.status(201).json(user) })
-                    .catch((error) => {
-                        console.error(error);
-                        res.status(500).send('Error: ' + error);
-                    })
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-            res.status(500).send('Error: ' + error);
-        });
-});
+/* Validation logic here for request
+- you can either use a chain of methods like .not().isEmpty() which means 
+"opposite of isEmpty" in plain english "is not empty"
+- or use .isLength({min: 5}) which means
+minimum value of 5 characters are only allowed*/
+app.post('/users',
+    [
+        check('Username', 'Username is required').isLength({ min: 5 }),
+        check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+        check('Password', 'Password is required').not().isEmpty(),
+        check('Email', 'Email does not appear to be valid').isEmail()
+    ], (req, res) => {
+        let errors = validationResult(req); // check the validation object for errors
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
+        }
+        let hashedPassword = Users.hashPassword(req.body.Password);
+        Users.findOne({ UserName: req.body.UserName }) // Search to see if a user with the requested username already exists
+            .then((user) => {
+                if (user) { //If the user is found, send a response that it already exists
+                    return res.status(400).send(req.body.UserName + 'already exists');
+                } else {
+                    Users
+                        .create({
+                            UserName: req.body.UserName,
+                            Password: hashedPassword,
+                            Email: req.body.Email,
+                            Birth_Date: req.body.Birth_Date
+                        })
+                        .then((user) => { res.status(201).json(user) })
+                        .catch((error) => {
+                            console.error(error);
+                            res.status(500).send('Error: ' + error);
+                        });
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                res.status(500).send('Error: ' + error);
+            });
+    });
 
 // Get all users
 app.get('/users', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -86,13 +119,23 @@ app.get('/users/:UserName', passport.authenticate('jwt', { session: false }), (r
         });
 });
 // Get a user by username and update
-app.put('/users/:UserName', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.put('/users/:UserName', [
+    check('UserName', 'Username is required').isLength({ min: 5 }),
+    check('UserName', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail()
+], (req, res) => {
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    let hashedPassword = Users.hashPassword(req.body.Password);
     Users.findOneAndUpdate(
         { UserName: req.params.UserName },
         {
             $set: {
                 UserName: req.body.UserName,
-                Password: req.body.Password,
+                Password: hashedPassword,
                 Email: req.body.Email,
                 Birth_Date: req.body.Birth_Date
             },
@@ -216,6 +259,7 @@ app.use((err, req, res, next) => {
 
 
 // listen for requests 
-app.listen(8080, () => {
-    console.log('Your app is listening on port 8080.');
-}); 
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0', () => {
+    console.log('Listening on Port ' + port);
+});
