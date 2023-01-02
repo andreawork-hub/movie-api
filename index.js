@@ -27,7 +27,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 const cors = require('cors');
-// app.use(cors());
+app.use(cors());
 
 //let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
 
@@ -49,7 +49,7 @@ const passport = require('passport');
 require('./passport');
 
 
-app.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/', (req, res) => {
     res.send('Welcome to myFlix!');
 });
 
@@ -248,7 +248,7 @@ app.get('/movies/directors/:Name', passport.authenticate('jwt', { session: false
         });
 });
 
-app.get('/documentation', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/documentation', (req, res) => {
     res.sendFile('public/documentation.html', { root: __dirname });
 });
 
