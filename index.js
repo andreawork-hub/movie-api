@@ -1,36 +1,39 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
 const uuid = require('uuid');
+
 const morgan = require('morgan');
 const app = express();
-
 const { check, validationResult } = require('express-validator');
 
 const mongoose = require('mongoose');
 const Models = require('./models.js');
-
 const Movies = Models.Movie;
 const Users = Models.User;
-const Genres = Models.Genre;
-const Directors = Models.Director;
 
+app.use(express.json());
 // mongoose.connect('mongodb://localhost:27017/dbname', { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
+// =========================
+//        MIDDLEWARE 
+// =========================
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static('public'));
 app.use(morgan('common'));
 
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
 const cors = require('cors');
 app.use(cors());
 
-//let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+//ensures that Express is available in “auth.js” file as well
+//require the Passport module and import the “passport.js” file
+let auth = require('./auth')(app);
+const passport = require('passport');
+require('./passport');
 
+/*let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
@@ -40,13 +43,11 @@ app.use(cors({
         }
         return callback(null, true);
     }
-}));
+})); */
 
-let auth = require('./auth')(app);
-//ensures that Express is available in “auth.js” file as well
-const passport = require('passport');
-//require the Passport module and import the “passport.js” file
-require('./passport');
+// =========================
+//        REST
+// =========================
 
 
 app.get('/', (req, res) => {
